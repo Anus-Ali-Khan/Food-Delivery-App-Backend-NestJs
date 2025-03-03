@@ -38,7 +38,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Passowrd');
     }
 
-    //Step 3 : Generate a JWT containing thr user's ID and return it
+    //Step 3 : Generate a JWT containing the user's ID and return it
     return {
       accessToken: this.jwtService.sign({ userId: user.id }),
     };
