@@ -53,12 +53,37 @@ export class UsersService {
   }
 
   async findOne(id: number) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
-    return user;
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id,
+        },
+      });
+      if (user) {
+        return {
+          status: HttpStatus.FOUND,
+          message: 'User found Successfully',
+          response: user,
+        };
+      } else {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: 'User not found',
+          response: user,
+        };
+      }
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Internal Server Error',
+        },
+        HttpStatus.FORBIDDEN,
+        {
+          cause: error,
+        },
+      );
+    }
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
@@ -89,12 +114,29 @@ export class UsersService {
   }
 
   async deleteUser(id: number) {
-    const deletedUser = await this.prisma.user.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      const deletedUser = await this.prisma.user.delete({
+        where: {
+          id,
+        },
+      });
 
-    return deletedUser;
+      return {
+        status: HttpStatus.OK,
+        message: 'User Deleted Successfully',
+        response: deletedUser,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Internal Server Error',
+        },
+        HttpStatus.FORBIDDEN,
+        {
+          cause: error,
+        },
+      );
+    }
   }
 }
