@@ -14,6 +14,7 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  //Create user
   async create(createUserDto: CreateUserDto) {
     try {
       const userEmail = await this.findByEmail(createUserDto.email);
@@ -43,6 +44,7 @@ export class UsersService {
     }
   }
 
+  //Find by email
   async findByEmail(email: string) {
     const user = await this.prisma.user.findUnique({
       where: {
@@ -86,6 +88,29 @@ export class UsersService {
     }
   }
 
+  async findAll() {
+    try {
+      const users = this.prisma.user.findMany();
+      return {
+        status: HttpStatus.OK,
+        message: 'All users',
+        response: users,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Internal Server Error',
+        },
+        HttpStatus.FORBIDDEN,
+        {
+          cause: error,
+        },
+      );
+    }
+  }
+
+  //Update User
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
     try {
       const updatedUser = await this.prisma.user.update({
@@ -113,6 +138,7 @@ export class UsersService {
     }
   }
 
+  //Delete User
   async deleteUser(id: number) {
     try {
       const deletedUser = await this.prisma.user.delete({
