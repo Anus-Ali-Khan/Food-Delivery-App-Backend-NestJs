@@ -90,7 +90,7 @@ export class UsersService {
 
   async findAll() {
     try {
-      const users = this.prisma.user.findMany();
+      const users = await this.prisma.user.findMany({});
       return {
         status: HttpStatus.OK,
         message: 'All users',

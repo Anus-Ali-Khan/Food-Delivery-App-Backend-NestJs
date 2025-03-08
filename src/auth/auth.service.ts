@@ -39,8 +39,8 @@ export class AuthService {
       accessToken: this.jwtService.sign(
         { userId: user.id },
         {
-          secret: ' zjP9h6ZI5LoSKCRj',
-          expiresIn: '5m',
+          secret: 'zjP9h6ZI5LoSKCRj',
+          expiresIn: '24h',
         },
       ),
     };
