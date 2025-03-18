@@ -7,8 +7,10 @@ import {
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/createUser.dto';
-
+import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/updateUser.dto';
+
+export const roundsOfHashing = 10;
 
 @Injectable()
 export class UsersService {
@@ -22,6 +24,14 @@ export class UsersService {
       if (userEmail) {
         throw new ConflictException('Email already exists');
       }
+
+      const hashedPassword = await bcrypt.hash(
+        createUserDto.password,
+        roundsOfHashing,
+      );
+
+      createUserDto.password = hashedPassword;
+
       const user = await this.prisma.user.create({
         data: createUserDto,
       });
