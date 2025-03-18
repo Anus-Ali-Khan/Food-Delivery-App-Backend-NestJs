@@ -123,6 +123,13 @@ export class UsersService {
   //Update User
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
     try {
+      if (updateUserDto.password) {
+        updateUserDto.password = await bcrypt.hash(
+          updateUserDto.password,
+          roundsOfHashing,
+        );
+      }
+
       const updatedUser = await this.prisma.user.update({
         where: {
           id,
