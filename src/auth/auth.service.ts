@@ -1,20 +1,54 @@
 import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'prisma/prisma.service';
 import { AuthEntity } from './entity/auth.entity';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { SignupDto } from './dto/signup.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private userService: UsersService,
   ) {}
+
+  // async signup(signupDto: SignupDto): Promise<AuthEntity> {
+  //   try {
+  //     const user = this.userService.create(signupDto)
+  //     if(user){
+  //       return {
+  //         accessToken: this.jwtService.sign(
+  //           { userId: user.id },
+  //           {
+  //             secret: 'zjP9h6ZI5LoSKCRj',
+  //             expiresIn: '24h',
+  //           },
+  //         ),
+  //       }
+  //     }
+  //   } catch (error) {
+  //     throw new HttpException(
+  //       {
+  //         status: HttpStatus.INTERNAL_SERVER_ERROR,
+  //         error: 'Internal Server Error',
+  //       },
+  //       HttpStatus.FORBIDDEN,
+  //       {
+  //         cause: error,
+  //       },
+  //     );
+  //   }
+  // }
 
   async login(loginDto: LoginDto): Promise<AuthEntity> {
     // Step 1 : Fetch a user with the given email
