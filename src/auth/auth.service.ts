@@ -12,7 +12,8 @@ import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { SignupDto } from './dto/signup.dto';
-import { UsersService } from 'src/users/users.service';
+import { roundsOfHashing, UsersService } from 'src/users/users.service';
+import { error } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -22,33 +23,61 @@ export class AuthService {
     private userService: UsersService,
   ) {}
 
-  // async signup(signupDto: SignupDto): Promise<AuthEntity> {
-  //   try {
-  //     const user = this.userService.create(signupDto)
-  //     if(user){
-  //       return {
-  //         accessToken: this.jwtService.sign(
-  //           { userId: user.id },
-  //           {
-  //             secret: 'zjP9h6ZI5LoSKCRj',
-  //             expiresIn: '24h',
-  //           },
-  //         ),
-  //       }
-  //     }
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       {
-  //         status: HttpStatus.INTERNAL_SERVER_ERROR,
-  //         error: 'Internal Server Error',
-  //       },
-  //       HttpStatus.FORBIDDEN,
-  //       {
-  //         cause: error,
-  //       },
-  //     );
-  //   }
-  // }
+  async findByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    return user;
+  }
+
+  async signup(signupDto: SignupDto) {
+    try {
+      const userEmail = await this.findByEmail(signupDto.email);
+
+      if (userEmail) {
+        return {
+          status: HttpStatus.CONFLICT,
+          message: 'Email already exist',
+        };
+      }
+
+      const hashedPassword = await bcrypt.hash(
+        signupDto.password,
+        roundsOfHashing,
+      );
+
+      signupDto.password = hashedPassword;
+
+      const user = await this.prisma.user.create({
+        data: signupDto,
+      });
+      return {
+        status: HttpStatus.CREATED,
+        message: 'User Created Successfully',
+        response: user,
+        accessToken: this.jwtService.sign(
+          { userId: user.id },
+          {
+            secret: 'zjP9h6ZI5LoSKCRj',
+            expiresIn: '24h',
+          },
+        ),
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Internal Server Error',
+        },
+        HttpStatus.FORBIDDEN,
+        {
+          cause: error,
+        },
+      );
+    }
+  }
 
   async login(loginDto: LoginDto): Promise<AuthEntity> {
     // Step 1 : Fetch a user with the given email
