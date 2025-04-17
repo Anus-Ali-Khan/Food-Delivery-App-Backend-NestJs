@@ -20,12 +20,12 @@ model User {
   email               String    @unique 
   password            String 
   confirmPassword     String 
-  otps                Otp[]
+  otp                 Otp?
 }
 
 model Otp {
-  id                  Int        @default(autoincrement()) @id
-  userId              Int
-  email               User       @relation(fields: [userId], references: [id])
-  otp                 Int
+  id                  Int       @default(autoincrement()) @id
+  userId              Int       @unique
+  user                User      @relation(fields: [userId], references: [id])
+  otp                 Int       
 }
