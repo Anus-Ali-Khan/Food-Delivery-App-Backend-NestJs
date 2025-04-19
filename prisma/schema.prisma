@@ -27,5 +27,5 @@ model Otp {
   id                  Int       @default(autoincrement()) @id
   userId              Int       @unique
   user                User      @relation(fields: [userId], references: [id])
-  otp                 Int       
+  otp                 String       
 }

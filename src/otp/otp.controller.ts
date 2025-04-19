@@ -7,10 +7,7 @@ export class OtpController {
 
   @Post()
   async sendOtp(@Body('email') email: string) {
-    const result = await this.otpService.sendOtpToEmail(email);
-    return {
-      message: 'OTP send successfully',
-      otp: result,
-    };
+    const response = await this.otpService.sendOtpToEmail(email);
+    return response;
   }
 }

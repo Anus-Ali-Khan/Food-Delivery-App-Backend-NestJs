@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { randomInt } from 'crypto';
 import * as dotenv from 'dotenv';
-import { LoginDto } from 'src/auth/dto/login.dto';
 import { PrismaService } from 'prisma/prisma.service';
 
 dotenv.config();
@@ -38,15 +37,33 @@ export class OtpService {
     return otp;
   }
 
+  async createOtp(email: string) {
+    const userExist = await this.verifyEmail(email);
+
+    if (userExist) {
+      const otp = this.generateOtp();
+      const userOtp = await this.prisma.otp.create({
+        data: {
+          userId: userExist.id,
+          otp: otp,
+        },
+      });
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Otp Created Successfully',
+        response: userOtp,
+      };
+    }
+  }
+
   //Send Otp To Email
-  async sendOtpToEmail(email: string): Promise<string> {
+  async sendOtpToEmail(email: string) {
     try {
       const emailExist = await this.verifyEmail(email);
       if (emailExist) {
         const otp = this.generateOtp();
         try {
           // Send OTP via email
-
           await this.emailTransporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
@@ -55,14 +72,17 @@ export class OtpService {
             html: `<p>Your OTP is <strong>${otp}</strong></p>`,
           });
 
-          return otp; // Return OTP to save it for verification
+          return {
+            message: 'OTP send successfully',
+            otp: otp, // Return OTP to save it for verification
+          };
         } catch (error) {
-          console.error('Error sending OTP via eamil', error);
+          console.error('Error sending OTP via email', error);
           throw new Error('Failed to send OTP via email');
         }
       } else {
         const message = 'Email does not exist';
-        return message;
+        return { message };
       }
     } catch (error) {
       throw new HttpException(
