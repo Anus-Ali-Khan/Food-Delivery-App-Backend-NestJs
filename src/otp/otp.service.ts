@@ -37,31 +37,25 @@ export class OtpService {
     return otp;
   }
 
-  async createOtp(email: string) {
-    const userExist = await this.verifyEmail(email);
-
-    if (userExist) {
-      const otp = this.generateOtp();
-      const userOtp = await this.prisma.otp.create({
-        data: {
-          userId: userExist.id,
-          otp: otp,
-        },
-      });
-      return {
-        status: HttpStatus.CREATED,
-        message: 'Otp Created Successfully',
-        response: userOtp,
-      };
-    }
-  }
-
   //Send Otp To Email
   async sendOtpToEmail(email: string) {
     try {
-      const emailExist = await this.verifyEmail(email);
-      if (emailExist) {
+      const userExist = await this.verifyEmail(email);
+      if (userExist) {
         const otp = this.generateOtp();
+        const userOtp = await this.prisma.otp.upsert({
+          where: {
+            id: userExist.id,
+          },
+          update: {
+            otp: otp,
+          },
+          create: {
+            userId: userExist.id,
+            otp: otp,
+          },
+        });
+
         try {
           // Send OTP via email
           await this.emailTransporter.sendMail({
@@ -74,7 +68,7 @@ export class OtpService {
 
           return {
             message: 'OTP send successfully',
-            otp: otp, // Return OTP to save it for verification
+            otp: userOtp, // Return OTP to save it for verification
           };
         } catch (error) {
           console.error('Error sending OTP via email', error);
@@ -82,7 +76,7 @@ export class OtpService {
         }
       } else {
         const message = 'Email does not exist';
-        return { message };
+        return { message: message };
       }
     } catch (error) {
       throw new HttpException(
