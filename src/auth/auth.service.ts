@@ -54,10 +54,18 @@ export class AuthService {
       const user = await this.prisma.user.create({
         data: body,
       });
+
+      const userRole = await this.prisma.role.create({
+        data: {
+          userId: user.id,
+          role: signupDto.role,
+        },
+      });
+
       return {
         status: HttpStatus.CREATED,
         message: 'User Created Successfully',
-        response: user,
+        response: { user, role: userRole },
         accessToken: this.jwtService.sign(
           { userId: user.id },
           {
