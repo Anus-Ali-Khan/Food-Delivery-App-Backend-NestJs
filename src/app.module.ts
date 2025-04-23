@@ -11,6 +11,7 @@ import { ConfigService } from './config/config.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { OtpModule } from './otp/otp.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { OtpModule } from './otp/otp.module';
     AuthModule,
     UsersModule,
     OtpModule,
+    RoleModule,
   ],
   controllers: [AppController, AuthController],
   providers: [

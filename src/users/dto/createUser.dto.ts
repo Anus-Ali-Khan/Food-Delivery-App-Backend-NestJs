@@ -1,11 +1,18 @@
 import {
+  IsArray,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsString,
   Matches,
   MinLength,
 } from 'class-validator';
 
+export enum Role {
+  User = 'user',
+  Vendor = 'vendor',
+  Rider = 'rider',
+}
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()

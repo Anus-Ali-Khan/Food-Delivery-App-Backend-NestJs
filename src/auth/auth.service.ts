@@ -13,7 +13,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { SignupDto } from './dto/signup.dto';
 import { roundsOfHashing, UsersService } from 'src/users/users.service';
-import { error } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -50,8 +49,10 @@ export class AuthService {
 
       signupDto.password = hashedPassword;
 
+      const { role, ...body } = signupDto;
+
       const user = await this.prisma.user.create({
-        data: signupDto,
+        data: body,
       });
       return {
         status: HttpStatus.CREATED,

@@ -1,10 +1,12 @@
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsString,
   Matches,
   MinLength,
 } from 'class-validator';
+import { Role } from 'src/users/dto/createUser.dto';
 
 export class SignupDto {
   @IsNotEmpty()
@@ -26,4 +28,7 @@ export class SignupDto {
   @IsNotEmpty()
   @MinLength(8)
   confirmPassword: string;
+
+  @IsEnum(Role, { message: 'Valid role required' })
+  role: Role;
 }
