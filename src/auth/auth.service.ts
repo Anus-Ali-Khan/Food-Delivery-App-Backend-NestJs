@@ -34,11 +34,17 @@ export class AuthService {
   async signup(signupDto: SignupDto) {
     try {
       const userEmail = await this.findByEmail(signupDto.email);
+      const userRoleExist = await this.prisma.role.findFirst({
+        where: {
+          userId: userEmail?.id,
+        },
+      });
 
-      if (userEmail) {
+      // If email and role both exist
+      if (userEmail && userRoleExist) {
         return {
           status: HttpStatus.CONFLICT,
-          message: 'Email already exist',
+          message: 'Email and Role already exist',
         };
       }
 
@@ -49,6 +55,30 @@ export class AuthService {
 
       signupDto.password = hashedPassword;
 
+      // If Email Exist and Role does not exist
+      if (userEmail && !userRoleExist) {
+        const addNewRole = await this.prisma.role.create({
+          data: {
+            userId: userEmail.id,
+            role: signupDto.role,
+          },
+        });
+
+        return {
+          status: HttpStatus.CREATED,
+          message: `New role assign to the user ${userEmail.email}`,
+          response: { userEmail, role: addNewRole },
+          accessToken: this.jwtService.sign(
+            { userId: userEmail.id },
+            {
+              secret: 'zjP9h6ZI5LoSKCRj',
+              expiresIn: '24h',
+            },
+          ),
+        };
+      }
+
+      // If neither Email nor role exist
       const { role, ...body } = signupDto;
 
       const user = await this.prisma.user.create({
