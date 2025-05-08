@@ -1,3 +1,4 @@
+import { RoleEnum } from '@prisma/client';
 import {
   IsEmail,
   IsEnum,
@@ -6,7 +7,6 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
-import { Role } from 'src/users/dto/createUser.dto';
 
 export class SignupDto {
   @IsNotEmpty()
@@ -29,6 +29,7 @@ export class SignupDto {
   @MinLength(8)
   confirmPassword: string;
 
-  @IsEnum(Role, { message: 'Valid role required' })
-  role: Role;
+  @IsEnum(RoleEnum)
+  @IsNotEmpty()
+  role: RoleEnum;
 }

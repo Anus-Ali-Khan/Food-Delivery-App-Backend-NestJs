@@ -125,12 +125,32 @@ export class AuthService {
         email: loginDto.email,
       },
     });
+
+    const userRole = await this.prisma.role.findMany({
+      where: {
+        id: user?.id,
+      },
+    });
+
+    //If no user and role is found, throw an error
+    if (!user && !userRole) {
+      throw new NotFoundException(
+        `No user found for email and role : ${loginDto.email} and ${loginDto.role}`,
+      );
+    }
+
     //If no user is found, throw an error
     if (!user) {
       throw new NotFoundException(
-        `No user found for email : ${loginDto.email}`,
+        `No user found for email : ${loginDto.email} `,
       );
     }
+
+    //If no role is found, throw an error
+    if (!userRole) {
+      throw new NotFoundException(`No user found for role :  ${loginDto.role}`);
+    }
+
     // Step 2: Check If the password is correct
     const isPasswordValid = await bcrypt.compare(
       loginDto.password,

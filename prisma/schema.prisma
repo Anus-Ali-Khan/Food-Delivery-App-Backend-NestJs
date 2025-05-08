@@ -35,13 +35,13 @@ model Otp {
 }
 
 model Role {
-  id     Int   @id @default(autoincrement())
+  id     Int      @id @default(autoincrement())
   userId Int
-  user   User  @relation(fields: [userId], references: [id])
-  role   Roles
+  user   User     @relation(fields: [userId], references: [id])
+  role   RoleEnum
 }
 
-enum Roles {
+enum RoleEnum {
   user
   vendor
   rider
