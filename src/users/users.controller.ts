@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @Controller('user')
 export class UsersController {
@@ -27,6 +28,12 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async findAll() {
     return await this.userService.findAll();
+  }
+
+  @Put('/changePassword')
+  @UseGuards(JwtAuthGuard)
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+    return await this.userService.changePassword(changePasswordDto);
   }
 
   @Get(':id')

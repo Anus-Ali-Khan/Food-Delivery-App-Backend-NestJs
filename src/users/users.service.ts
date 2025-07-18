@@ -9,6 +9,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 export const roundsOfHashing = 10;
 
@@ -169,6 +170,47 @@ export class UsersService {
         message: 'User Deleted Successfully',
         response: deletedUser,
       };
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Internal Server Error',
+        },
+        HttpStatus.FORBIDDEN,
+        {
+          cause: error,
+        },
+      );
+    }
+  }
+
+  // Change Password
+
+  async changePassword(changePasswordDto: ChangePasswordDto) {
+    try {
+      const userExist = await this.findByEmail(changePasswordDto.email);
+
+      if (userExist) {
+        const newHashedPassword = await bcrypt.hash(
+          changePasswordDto.password,
+          roundsOfHashing,
+        );
+
+        const updatedPassword = await this.prisma.user.update({
+          where: {
+            id: userExist.id,
+          },
+          data: {
+            password: newHashedPassword,
+          },
+        });
+
+        return {
+          status: HttpStatus.OK,
+          message: 'Password Changed Successfully',
+          response: updatedPassword,
+        };
+      }
     } catch (error) {
       throw new HttpException(
         {
