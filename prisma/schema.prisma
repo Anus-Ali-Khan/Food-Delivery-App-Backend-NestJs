@@ -22,6 +22,7 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   otp             Otp?
+  reviews         Review[]
   role            Role[]
 }
 
@@ -45,4 +46,60 @@ enum RoleEnum {
   user
   vendor
   rider
+}
+
+model Restaurant {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique
+  address           String
+  minimumOrderLimit String
+  deliveyTime       String
+  DeliveryCharges   String
+  restaurantType    RestautrantTypeEnum
+  reviews           Review[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  Menu              Dish[]
+  Deals             Deal[]
+}
+
+model Review {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id])
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model Deal {
+  id           Int        @id @default(autoincrement())
+  name         String     @unique
+  price        Int
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  Dish         Dish[]
+}
+
+model Dish {
+  id           Int              @id @default(autoincrement())
+  name         String           @unique
+  category     MenuCategoryEnum
+  price        Int
+  restaurantId Int
+  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id])
+  dealId       Int
+  deal         Deal             @relation(fields: [dealId], references: [id])
+}
+
+enum RestautrantTypeEnum {
+  homeDelivery
+  pickup
+}
+
+enum MenuCategoryEnum {
+  traditional
+  international
+  homemade
+  cuisine
+  chineese
 }
